@@ -6,6 +6,7 @@ import com.sanver.trials.mobileappws.ui.model.request.UserDetailsRequestModel;
 import com.sanver.trials.mobileappws.ui.model.response.UserRest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,7 +15,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("{userId}")
+    @GetMapping(path = "{userId}", produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest getUser(@PathVariable String userId) {
         UserRest returnValue = new UserRest();
         UserDto userDto = userService.getUserByUserId(userId);
@@ -23,7 +24,9 @@ public class UserController {
         return returnValue;
     }
 
-    @PostMapping
+    @PostMapping(
+            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE},
+            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest postUser(@RequestBody UserDetailsRequestModel userDetails) {
         UserRest returnValue = new UserRest();
         UserDto userDto = new UserDto();
