@@ -1,10 +1,12 @@
 package com.sanver.trials.mobileappws.service.impl;
 
+import com.sanver.trials.mobileappws.io.entity.AddressEntity;
 import com.sanver.trials.mobileappws.io.repository.UserRepository;
 import com.sanver.trials.mobileappws.io.entity.UserEntity;
 import com.sanver.trials.mobileappws.service.UserService;
 import com.sanver.trials.mobileappws.shared.Utils;
 import com.sanver.trials.mobileappws.shared.dto.UserDto;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -14,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,18 +35,22 @@ public class UserServiceImpl implements UserService {
         if (userRepository.findByEmail(user.getEmail()) != null)
             throw new RuntimeException("Record already exists");
 
-        UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(user, userEntity);
+        ModelMapper modelMapper = new ModelMapper();
+        UserEntity userEntity = modelMapper.map(user, UserEntity.class);
 
         String userId = utils.generateUserId(30);
         userEntity.setUserId(userId);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 
+        List<AddressEntity> addresses = userEntity.getAddresses();
+        if (addresses != null)
+            for (AddressEntity address : addresses) {
+                address.setAddressId(utils.generateAddressId(30));
+                address.setUserDetails(userEntity);
+            }
         UserEntity storedUserDetails = userRepository.save(userEntity);
-        UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(storedUserDetails, returnValue);
 
-        return returnValue;
+        return modelMapper.map(storedUserDetails, UserDto.class);
     }
 
     @Override

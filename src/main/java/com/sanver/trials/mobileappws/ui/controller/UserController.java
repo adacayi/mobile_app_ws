@@ -4,6 +4,7 @@ import com.sanver.trials.mobileappws.service.UserService;
 import com.sanver.trials.mobileappws.shared.dto.UserDto;
 import com.sanver.trials.mobileappws.ui.model.request.UserDetailsRequestModel;
 import com.sanver.trials.mobileappws.ui.model.response.UserRest;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,8 +30,12 @@ public class UserController {
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
     public UserRest postUser(@RequestBody UserDetailsRequestModel userDetails) {
         UserRest returnValue = new UserRest();
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetails, userDto);
+
+
+//        UserDto userDto = new UserDto();
+//        BeanUtils.copyProperties(userDetails, userDto);
+        ModelMapper modelMapper = new ModelMapper();
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
         UserDto createdUser = userService.createUser(userDto);
         BeanUtils.copyProperties(createdUser, returnValue);
         return returnValue;
